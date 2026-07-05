@@ -4,6 +4,7 @@ import { LayoutGrid, Megaphone, Settings, Wallet, Wrench } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { repo } from "@/lib/repo";
 import { BottomNav, type NavItem } from "@/components/ui/BottomNav";
+import { SideNav } from "@/components/ui/SideNav";
 import { Avatar, Badge } from "@/components/ui/base";
 import { logoutAction } from "@/app/actions";
 
@@ -26,9 +27,26 @@ export default async function ManageLayout({ children }: { children: React.React
     { href: "/manage/settings", label: "הגדרות", icon: <Settings size={20} /> },
   ];
 
+  const sideHeader = (
+    <Link href="/manage/settings" className="tap flex items-center gap-3">
+      <Avatar name={session.name} size={40} />
+      <div className="min-w-0 leading-tight">
+        <div className="flex items-center gap-2"><p className="truncate text-sm font-extrabold">{company?.name ?? "ניהול"}</p><Badge tone="brand">ניהול</Badge></div>
+        <p className="truncate text-[11px] text-muted">{building?.name}</p>
+        {buildings.length > 1 && <p className="mt-0.5 text-[10px] text-faint">{buildings.length} בניינים בחברה</p>}
+      </div>
+    </Link>
+  );
+
+  const logout = (
+    <form action={logoutAction}><button className="tap w-full rounded-xl bg-surface-2 px-3 py-2.5 text-sm font-bold text-muted" type="submit">יציאה</button></form>
+  );
+
   return (
-    <div style={{ ["--brand" as string]: building?.brandColor ?? "#4f46e5" }} className="min-h-full">
-      <header className="sticky top-0 z-30 border-b border-border bg-surface/85 backdrop-blur-lg">
+    <div style={{ ["--brand" as string]: building?.brandColor ?? "#4f46e5" }} className="min-h-full lg:ps-60">
+      <SideNav items={nav} rootHref="/manage" header={sideHeader} footer={logout} />
+
+      <header className="sticky top-0 z-30 border-b border-border bg-surface/85 backdrop-blur-lg lg:hidden">
         <div className="mx-auto flex max-w-lg items-center justify-between gap-3 px-4 py-3">
           <Link href="/manage/settings" className="tap"><Avatar name={session.name} size={38} /></Link>
           <div className="min-w-0 flex-1 text-center leading-tight">
@@ -39,8 +57,10 @@ export default async function ManageLayout({ children }: { children: React.React
           <form action={logoutAction}><button className="tap rounded-full bg-surface-2 px-3 py-2 text-xs font-bold text-muted" type="submit">יציאה</button></form>
         </div>
       </header>
-      <main className="mx-auto max-w-lg px-4 pb-28 pt-4">{children}</main>
-      <BottomNav items={nav} />
+      <main className="mx-auto max-w-lg px-4 pb-28 pt-4 lg:max-w-5xl lg:px-8 lg:pb-12 lg:pt-8">{children}</main>
+      <div className="lg:hidden">
+        <BottomNav items={nav} />
+      </div>
     </div>
   );
 }

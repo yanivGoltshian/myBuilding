@@ -36,11 +36,14 @@ export interface NewBookingInput {
   residentName: string;
   date: string;
   time: string;
+  endTime?: string;
   subject: string;
+  fee?: number;
 }
 
 export interface NewMarketInput {
   buildingId: string;
+  residentId?: string;
   sellerName: string;
   unit: string;
   title: string;
@@ -48,6 +51,14 @@ export interface NewMarketInput {
   price: number;
   isFree: boolean;
   category: MarketItem["category"];
+}
+
+export interface UpdateMarketInput {
+  title?: string;
+  description?: string;
+  price?: number;
+  isFree?: boolean;
+  category?: MarketItem["category"];
 }
 
 export interface NewLedgerInput {
@@ -101,6 +112,7 @@ export interface BrandingInput {
   brandColor?: string;
   logoText?: string;
   roomBookingEnabled?: boolean;
+  roomBookingFee?: number;
 }
 
 export interface BuildingInfoInput {
@@ -143,8 +155,11 @@ export interface Repo {
   payDues(unitId: string, period: string): Promise<Payment | undefined>;
   votePoll(pollId: string, optionId: string): Promise<Poll | undefined>;
   reactAnnouncement(id: string): Promise<void>;
-  createBooking(input: NewBookingInput): Promise<RoomBooking>;
+  createBooking(input: NewBookingInput): Promise<RoomBooking | undefined>;
+  payBooking(id: string): Promise<RoomBooking | undefined>;
   addMarketItem(input: NewMarketInput): Promise<MarketItem>;
+  updateMarketItem(id: string, input: UpdateMarketInput): Promise<MarketItem | undefined>;
+  deleteMarketItem(id: string): Promise<void>;
   addLedger(input: NewLedgerInput): Promise<Ledger>;
   createAnnouncement(input: NewAnnouncementInput): Promise<Announcement>;
   createPoll(input: NewPollInput): Promise<Poll>;

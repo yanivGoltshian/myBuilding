@@ -26,6 +26,7 @@ export function seedDatabase(): Database {
         brandColor: "#4f46e5",
         logoText: "מגדלי פיכמן",
         roomBookingEnabled: true,
+        roomBookingFee: 120,
         bankName: "בנק הפועלים",
         bankLast4: "4821",
       },
@@ -38,6 +39,7 @@ export function seedDatabase(): Database {
         brandColor: "#0d9488",
         logoText: "פארק רוטשילד",
         roomBookingEnabled: true,
+        roomBookingFee: 150,
         bankName: "בנק לאומי",
         bankLast4: "1190",
       },
@@ -86,8 +88,8 @@ export function seedDatabase(): Database {
     ],
 
     bookings: [
-      { id: "bk1", buildingId: "b1", unitId: "u31", residentName: "רונית לוי", date: iso(9).slice(0, 10), time: "18:00", subject: "יום הולדת" },
-      { id: "bk2", buildingId: "b1", unitId: "u63", residentName: "משפחת ביטון", date: iso(16).slice(0, 10), time: "20:00", subject: "ערב משחקים" },
+      { id: "bk1", buildingId: "b1", unitId: "u31", residentName: "רונית לוי", date: iso(9).slice(0, 10), time: "18:00", endTime: "19:00", subject: "יום הולדת", fee: 120, paid: true },
+      { id: "bk2", buildingId: "b1", unitId: "u63", residentName: "משפחת ביטון", date: iso(16).slice(0, 10), time: "20:00", endTime: "21:00", subject: "ערב משחקים", fee: 120, paid: false },
     ],
 
     docs: [
@@ -139,9 +141,10 @@ export function seedDatabase(): Database {
     ],
 
     market: [
-      { id: "m1", buildingId: "b1", sellerName: "שירה מזרחי", unit: "12", title: "ספה תלת-מושבית אפורה", description: "במצב מצוין, פינוי עצמי מדירה 12.", price: 400, isFree: false, category: "furniture", date: iso(-2) },
+      { id: "m0", buildingId: "b1", residentId: "r55", sellerName: "יניב גולטשיאן", unit: "55", title: "אופניים חשמליים", description: "שנתיים בשימוש, סוללה חדשה. אפשר לראות בדירה 55.", price: 1800, isFree: false, category: "other", date: iso(-1) },
+      { id: "m1", buildingId: "b1", residentId: "r12", sellerName: "שירה מזרחי", unit: "12", title: "ספה תלת-מושבית אפורה", description: "במצב מצוין, פינוי עצמי מדירה 12.", price: 400, isFree: false, category: "furniture", date: iso(-2) },
       { id: "m2", buildingId: "b1", sellerName: "משפחת ביטון", unit: "63", title: "אופני ילדים — חינם", description: "מידה 20, מתאים לגיל 6-9. מחכים בחניון.", price: 0, isFree: true, category: "kids", date: iso(-3) },
-      { id: "m3", buildingId: "b1", sellerName: "משה כהן", unit: "11", title: "מקרר קטן למשרד", description: "מקרר בר 90 ליטר, עובד מצוין.", price: 250, isFree: false, category: "appliance", date: iso(-6) },
+      { id: "m3", buildingId: "b1", residentId: "r11", sellerName: "משה כהן", unit: "11", title: "מקרר קטן למשרד", description: "מקרר בר 90 ליטר, עובד מצוין.", price: 250, isFree: false, category: "appliance", date: iso(-6) },
     ],
 
     gates: [

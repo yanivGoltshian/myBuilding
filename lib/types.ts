@@ -22,6 +22,7 @@ export interface Building {
   brandColor: string; // white-label accent per building
   logoText: string;
   roomBookingEnabled: boolean;
+  roomBookingFee?: number; // committee-set fee (₪) charged per room booking
   bankName?: string;
   bankLast4?: string;
 }
@@ -98,7 +99,10 @@ export interface RoomBooking {
   residentName: string;
   date: string; // YYYY-MM-DD
   time: string;
+  endTime?: string; // slot end (HH:MM)
   subject: string;
+  fee?: number; // captured from building.roomBookingFee at booking time
+  paid?: boolean; // demo online payment status
 }
 
 export interface DocItem {
@@ -176,6 +180,7 @@ export type MarketCategory =
 export interface MarketItem {
   id: string;
   buildingId: string;
+  residentId?: string; // owner — gates edit/delete to the poster
   sellerName: string;
   unit: string;
   title: string;

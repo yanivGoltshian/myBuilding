@@ -9,7 +9,7 @@ import {
   setSession,
   clearSession,
 } from "@/lib/session";
-import type { MeetingDecision } from "@/lib/types";
+import type { MarketCategory, MeetingDecision } from "@/lib/types";
 
 function currentPeriod(): string {
   const d = new Date();
@@ -87,21 +87,51 @@ export async function reactAction(formData: FormData) {
   revalidatePath("/app");
 }
 
-export async function createBookingAction(formData: FormData) {
+export type BookingResult =
+  | { ok: true; paid: boolean }
+  | { ok: false; error: string };
+
+function addOneHour(time: string): string {
+  const [h, m] = time.split(":").map(Number);
+  const end = (h + 1) % 24;
+  return `${String(end).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+export async function createBookingAction(formData: FormData): Promise<BookingResult> {
   const session = await getSession();
-  if (!session) return;
+  if (!session) return { ok: false, error: "יש להתחבר מחדש" };
   const date = String(formData.get("date") ?? "");
   const time = String(formData.get("time") ?? "");
   const subject = String(formData.get("subject") ?? "").trim();
-  if (!date || !time) return;
-  await repo.createBooking({
+  const pay = formData.get("pay") === "on";
+  if (!date || !time) return { ok: false, error: "נא לבחור תאריך ושעה" };
+
+  const building = await repo.getBuilding(session.buildingId);
+  const fee = building?.roomBookingFee ?? 0;
+
+  const booking = await repo.createBooking({
     buildingId: session.buildingId,
     unitId: session.unitId ?? "",
     residentName: session.name,
     date,
     time,
+    endTime: addOneHour(time),
     subject: subject || "שימוש בחדר הדיירים",
+    fee,
   });
+  if (!booking) return { ok: false, error: "המשבצת הזו כבר תפוסה, נסו שעה אחרת" };
+
+  if (pay && fee > 0) await repo.payBooking(booking.id);
+  revalidatePath("/app/more/room");
+  return { ok: true, paid: pay && fee > 0 };
+}
+
+export async function payBookingAction(formData: FormData) {
+  const session = await getSession();
+  if (!session) return;
+  const id = String(formData.get("bookingId") ?? "");
+  if (!id) return;
+  await repo.payBooking(id);
   revalidatePath("/app/more/room");
 }
 
@@ -112,18 +142,49 @@ export async function addMarketAction(formData: FormData) {
   const description = String(formData.get("description") ?? "").trim();
   const isFree = formData.get("isFree") === "on";
   const price = isFree ? 0 : Number(formData.get("price") ?? 0);
+  const category = String(formData.get("category") ?? "other") as MarketCategory;
   if (!title) return;
   const unit = session.unitId ? await repo.getUnit(session.unitId) : undefined;
   await repo.addMarketItem({
     buildingId: session.buildingId,
+    residentId: session.residentId,
     sellerName: session.name,
     unit: unit?.number ?? "",
     title,
     description,
     price,
     isFree,
-    category: "other",
+    category: category || "other",
   });
+  revalidatePath("/app/community/market");
+}
+
+async function ownsMarketItem(id: string): Promise<boolean> {
+  const session = await getSession();
+  if (!session) return false;
+  const items = await repo.getMarketByBuilding(session.buildingId);
+  const item = items.find((m) => m.id === id);
+  if (!item) return false;
+  if (item.residentId) return item.residentId === session.residentId;
+  return item.sellerName === session.name; // fallback for legacy items
+}
+
+export async function updateMarketAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id || !(await ownsMarketItem(id))) return;
+  const title = String(formData.get("title") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const isFree = formData.get("isFree") === "on";
+  const price = isFree ? 0 : Number(formData.get("price") ?? 0);
+  if (!title) return;
+  await repo.updateMarketItem(id, { title, description, price, isFree });
+  revalidatePath("/app/community/market");
+}
+
+export async function deleteMarketAction(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id || !(await ownsMarketItem(id))) return;
+  await repo.deleteMarketItem(id);
   revalidatePath("/app/community/market");
 }
 
@@ -261,13 +322,20 @@ export async function updateBrandingAction(formData: FormData) {
   const brandColor = String(formData.get("brandColor") ?? "").trim();
   const logoText = String(formData.get("logoText") ?? "").trim();
   const roomBookingEnabled = formData.get("roomBookingEnabled") === "on";
+  const feeRaw = formData.get("roomBookingFee");
+  const roomBookingFee =
+    feeRaw === null || String(feeRaw).trim() === ""
+      ? undefined
+      : Math.max(0, Number(feeRaw));
   await repo.updateBranding(session.buildingId, {
     brandColor: brandColor || undefined,
     logoText: logoText || undefined,
     roomBookingEnabled,
+    roomBookingFee,
   });
   revalidatePath("/manage/settings");
   revalidatePath("/manage");
+  revalidatePath("/app/more/room");
 }
 
 /* ---------------- Configurable building info hub ---------------- */

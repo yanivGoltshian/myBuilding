@@ -302,3 +302,79 @@ select {
   -webkit-tap-highlight-color: transparent;
   cursor: pointer;
 }
+
+/* animated poll options — full-row percentage fill */
+.poll-opt {
+  position: relative;
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-align: right;
+  border-radius: 16px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  padding: 0.75rem 0.875rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+}
+.poll-opt:disabled { cursor: default; }
+.poll-fill {
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 0;
+  background: color-mix(in srgb, var(--brand) 16%, transparent);
+  transition: width 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 0;
+}
+.poll-opt-chosen {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 1px var(--brand) inset;
+}
+.poll-opt-chosen .poll-fill {
+  background: color-mix(in srgb, var(--brand) 28%, transparent);
+}
+.poll-opt-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+@keyframes pollPop {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.025); }
+  100% { transform: scale(1); }
+}
+.poll-pop { animation: pollPop 0.45s ease; }
+
+/* responsive desktop side navigation */
+.side-nav {
+  position: fixed;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 15rem;
+  z-index: 40;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1.25rem 0.875rem;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: saturate(160%) blur(14px);
+  border-inline-end: 1px solid var(--border);
+}
+.side-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.7rem 0.85rem;
+  border-radius: 14px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--muted);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.side-nav-item:hover { background: var(--surface-2); color: var(--text); }
+.side-nav-item[data-active="true"] {
+  background: color-mix(in srgb, var(--brand) 13%, transparent);
+  color: var(--brand);
+}

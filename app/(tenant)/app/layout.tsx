@@ -4,6 +4,7 @@ import { Bell, Home, Users, Wallet, Wrench, LayoutGrid } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { repo } from "@/lib/repo";
 import { BottomNav, type NavItem } from "@/components/ui/BottomNav";
+import { SideNav } from "@/components/ui/SideNav";
 import { Avatar } from "@/components/ui/base";
 
 export default async function TenantLayout({
@@ -25,9 +26,23 @@ export default async function TenantLayout({
     { href: "/app/more", label: "עוד", icon: <LayoutGrid size={20} /> },
   ];
 
+  const sideHeader = (
+    <Link href="/app/more" className="tap flex items-center gap-3">
+      <Avatar name={session.name} size={40} />
+      <div className="min-w-0 leading-tight">
+        <p className="truncate text-sm font-extrabold">{building?.logoText}</p>
+        <p className="truncate text-[11px] text-muted">
+          {building?.address}, {building?.city}
+        </p>
+      </div>
+    </Link>
+  );
+
   return (
-    <div style={{ ["--brand" as string]: brand }} className="min-h-full">
-      <header className="sticky top-0 z-30 bg-surface/80 backdrop-blur-lg border-b border-border">
+    <div style={{ ["--brand" as string]: brand }} className="min-h-full lg:ps-60">
+      <SideNav items={nav} rootHref="/app" header={sideHeader} />
+
+      <header className="sticky top-0 z-30 bg-surface/80 backdrop-blur-lg border-b border-border lg:hidden">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 py-3">
           <Link href="/app/more" className="tap">
             <Avatar name={session.name} size={38} />
@@ -48,9 +63,11 @@ export default async function TenantLayout({
         </div>
       </header>
 
-      <main className="mx-auto max-w-lg px-4 pb-28 pt-4">{children}</main>
+      <main className="mx-auto max-w-lg px-4 pb-28 pt-4 lg:max-w-4xl lg:px-8 lg:pb-12 lg:pt-8">{children}</main>
 
-      <BottomNav items={nav} />
+      <div className="lg:hidden">
+        <BottomNav items={nav} />
+      </div>
     </div>
   );
 }

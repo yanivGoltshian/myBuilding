@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Heart, MessageCircle, Users, Vote } from "lucide-react";
-import { reactAction, votePollAction } from "@/app/actions";
-import { Card, EmptyState, IconTile, SectionHeader } from "@/components/ui/base";
+import { reactAction } from "@/app/actions";
+import { Card, EmptyState, SectionHeader } from "@/components/ui/base";
 import { relativeTime } from "@/lib/format";
 import { repo } from "@/lib/repo";
 import { AnnouncementBadge, getTenantContext } from "../../_components/tenant-ui";
+import { PollCard } from "./PollCard";
 
 export const metadata = { title: "קהילה" };
 
@@ -32,36 +33,9 @@ export default async function Page() {
         <SectionHeader title="הצבעות פתוחות" />
         {activePolls.length ? (
           <div className="space-y-3">
-            {activePolls.map((poll) => {
-              const total = poll.options.reduce((s, o) => s + o.votes, 0) || 1;
-              return (
-                <Card key={poll.id} className="p-4" as="article">
-                  <div className="flex items-start gap-3">
-                    <IconTile tone="brand"><Vote size={18} /></IconTile>
-                    <div className="min-w-0 flex-1">
-                      <h2 className="font-black">{poll.question}</h2>
-                      {poll.description && <p className="mt-1 text-sm text-muted">{poll.description}</p>}
-                      <p className="mt-2 text-xs text-brand">נסגר {relativeTime(poll.closesAt)}</p>
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-2">
-                    {poll.options.map((option) => {
-                      const pct = Math.round((option.votes / total) * 100);
-                      return (
-                        <form action={votePollAction} key={option.id}>
-                          <input type="hidden" name="pollId" value={poll.id} />
-                          <input type="hidden" name="optionId" value={option.id} />
-                          <button className="tap w-full rounded-2xl border border-border bg-surface p-3 text-right" type="submit">
-                            <span className="flex items-center justify-between gap-3 text-sm font-bold"><span>{option.label}</span><span className="text-muted">{option.votes} · {pct}%</span></span>
-                            <span className="progress-track mt-2 block"><span className="progress-fill block" style={{ width: `${pct}%` }} /></span>
-                          </button>
-                        </form>
-                      );
-                    })}
-                  </div>
-                </Card>
-              );
-            })}
+            {activePolls.map((poll) => (
+              <PollCard key={poll.id} poll={poll} />
+            ))}
           </div>
         ) : <EmptyState icon={<Vote size={24} />} title="אין הצבעות פתוחות" sub="כשוועד הבית יפתח הצבעה היא תופיע כאן." />}
       </section>

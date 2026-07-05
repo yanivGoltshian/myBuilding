@@ -12,6 +12,7 @@ import type {
   NewMeetingInput,
   NewPollInput,
   Repo,
+  UpdateMarketInput,
 } from "./types";
 
 // Persist a single mutable DB across requests and HMR reloads in `next dev`.
@@ -176,14 +177,42 @@ export const mockRepo: Repo = {
     if (a) a.reactions += 1;
   },
   async createBooking(input: NewBookingInput) {
-    const booking = { id: rid("bk"), ...input };
-    db().bookings.push(booking);
+    const d = db();
+    // availability guard: reject if the same date+time slot is already taken
+    const clash = d.bookings.some(
+      (b) =>
+        b.buildingId === input.buildingId &&
+        b.date === input.date &&
+        b.time === input.time
+    );
+    if (clash) return undefined;
+    const booking = { id: rid("bk"), paid: false, ...input };
+    d.bookings.push(booking);
+    return booking;
+  },
+  async payBooking(id) {
+    const booking = db().bookings.find((b) => b.id === id);
+    if (booking) booking.paid = true;
     return booking;
   },
   async addMarketItem(input: NewMarketInput) {
     const item = { id: rid("m"), ...input, date: new Date().toISOString() };
     db().market.unshift(item);
     return item;
+  },
+  async updateMarketItem(id, input: UpdateMarketInput) {
+    const item = db().market.find((m) => m.id === id);
+    if (!item) return undefined;
+    if (input.title !== undefined) item.title = input.title;
+    if (input.description !== undefined) item.description = input.description;
+    if (input.category !== undefined) item.category = input.category;
+    if (input.isFree !== undefined) item.isFree = input.isFree;
+    if (input.price !== undefined) item.price = input.isFree ? 0 : input.price;
+    return item;
+  },
+  async deleteMarketItem(id) {
+    const d = db();
+    d.market = d.market.filter((m) => m.id !== id);
   },
   async addLedger(input: NewLedgerInput) {
     const row = { id: rid("l"), ...input };
@@ -245,6 +274,8 @@ export const mockRepo: Repo = {
     if (input.logoText !== undefined) b.logoText = input.logoText;
     if (input.roomBookingEnabled !== undefined)
       b.roomBookingEnabled = input.roomBookingEnabled;
+    if (input.roomBookingFee !== undefined)
+      b.roomBookingFee = input.roomBookingFee;
   },
   async updateBuildingInfo(buildingId, input: BuildingInfoInput) {
     const d = db();
