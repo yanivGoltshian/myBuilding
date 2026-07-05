@@ -7,7 +7,7 @@ export function seedDatabase(): Database {
     id: "c1",
     name: "ניהול פרו",
     logoText: "ניהול פרו",
-    brandColor: "#4f46e5",
+    brandColor: "#2563eb",
     plan: "pro" as const,
     monthlyFee: 149,
     phone: "03-5551234",
@@ -23,7 +23,7 @@ export function seedDatabase(): Database {
         name: "מגדלי פיכמן",
         address: "פיכמן 25",
         city: "חולון",
-        brandColor: "#4f46e5",
+        brandColor: "#2563eb",
         logoText: "מגדלי פיכמן",
         roomBookingEnabled: true,
         roomBookingFee: 120,
@@ -150,7 +150,7 @@ export function seedDatabase(): Database {
     ],
 
     gates: [
-      { id: "g1", buildingId: "b1", name: "חניון", gatePhone: "0537778899", dialerPhone: "0524734788", isPrivate: true, color: "#4f46e5" },
+      { id: "g1", buildingId: "b1", name: "חניון", gatePhone: "0537778899", dialerPhone: "0524734788", isPrivate: true, color: "#2563eb" },
     ],
 
     meetings: [

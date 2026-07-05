@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { getSession } from "@/lib/session";
 import { BrandLogo } from "./_components/brand";
+import { LandingMotion } from "./_components/landing-motion";
+import { WhatsAppButton, WhatsAppFab } from "./_components/whatsapp";
 
 export const metadata = {
   title: "ניהול בניינים חכם לחברות ניהול ולדיירים",
@@ -61,10 +63,11 @@ export default async function LandingPage() {
 
   return (
     <main className="landing">
+      <LandingMotion>
       <header className="landing-nav">
         <div className="landing-wrap flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 font-black" aria-label="ועד — דף הבית">
-            <BrandLogo size={38} />
+            <BrandLogo size={38} uid="nav" />
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-bold text-muted md:flex">
             <a href="#residents" className="hover:text-text">לדיירים</a>
@@ -78,27 +81,28 @@ export default async function LandingPage() {
       <section className="landing-hero">
         <div className="landing-glow" aria-hidden />
         <div className="landing-wrap grid items-center gap-10 lg:grid-cols-2">
-          <div className="fade-up">
-            <span className="badge-brand inline-flex items-center gap-1.5"><Sparkles size={13} /> פלטפורמת ניהול הבניינים החכמה</span>
-            <h1 className="mt-4 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
+          <div>
+            <span data-hero className="badge-brand inline-flex items-center gap-1.5"><Sparkles size={13} /> פלטפורמת ניהול הבניינים החכמה</span>
+            <h1 data-hero className="mt-4 text-4xl font-black leading-tight tracking-tight sm:text-5xl">
               הבניין שלכם,<br />מנוהל כמו שצריך.
             </h1>
-            <p className="mt-4 max-w-lg text-lg text-muted">
+            <p data-hero className="mt-4 max-w-lg text-lg text-muted">
               אפליקציה אחת לחברות ניהול ולדיירים: גבייה אונליין, קריאות שירות, סקרים, אסיפות דיירים,
               אחזקה מונעת ושקיפות כספית מלאה — במיתוג שלכם.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
+            <div data-hero className="mt-7 flex flex-wrap items-center gap-3">
               <Link href={appHref} className="btn btn-brand h-12 px-6 text-base">{primaryCta} <ArrowLeft size={18} /></Link>
+              <WhatsAppButton />
               <a href="#residents" className="btn btn-outline h-12 px-6 text-base">גלו את הפיצ׳רים</a>
             </div>
-            <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
+            <div data-hero className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted">
               <span className="inline-flex items-center gap-1.5"><Check size={15} className="text-success" /> ללא סיסמאות — כניסה בטלפון</span>
               <span className="inline-flex items-center gap-1.5"><Check size={15} className="text-success" /> מותאם להתקנה בנייד</span>
             </div>
           </div>
 
-          <div className="fade-up flex justify-center lg:justify-start">
-            <div className="phone-mock">
+          <div data-hero className="flex justify-center lg:justify-start">
+            <div className="phone-mock" data-float>
               <div className="phone-notch" />
               <div className="phone-screen">
                 <div className="phone-pay">
@@ -132,7 +136,7 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section className="landing-wrap grid grid-cols-2 gap-4 py-4 md:grid-cols-4">
+      <section data-reveal-group className="landing-wrap grid grid-cols-2 gap-4 py-4 md:grid-cols-4">
         {[
           { v: "5 דק׳", l: "להעלאת בניין חדש" },
           { v: "100%", l: "מיתוג לבן לחברה" },
@@ -152,7 +156,7 @@ export default async function LandingPage() {
           <h2 className="mt-3 text-3xl font-black tracking-tight">כל מה שהופך את החיים בבניין לפשוטים</h2>
           <p className="mt-3 text-muted">חוויית משתמש ברמה של האפליקציות הטובות בעולם — שכל דייר ירצה להתקין בטלפון.</p>
         </div>
-        <div className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div data-reveal-group className="mt-9 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {residentFeatures.map((f) => (
             <div key={f.title} className="card card-hover p-5">
               <span className="icon-tile"><f.icon size={19} /></span>
@@ -172,7 +176,7 @@ export default async function LandingPage() {
               משלמים סכום קבוע קטן ומקבלים מערכת מלאה במיתוג שלכם — ניהול כספי, אחזקה, ספקים ותקשורת מול הדיירים.
               אפליקציית ניהול נפרדת לחלוטין מזו שהדיירים רואים.
             </p>
-            <ul className="mt-6 space-y-3">
+            <ul data-reveal-group className="mt-6 space-y-3">
               {companyValue.map((c) => (
                 <li key={c.title} className="flex items-start gap-3">
                   <span className="mt-0.5 grid h-9 w-9 flex-none place-items-center rounded-xl bg-surface text-brand shadow-sm"><c.icon size={17} /></span>
@@ -185,7 +189,7 @@ export default async function LandingPage() {
             </ul>
             <Link href="/login" className="btn btn-brand mt-7 h-12 px-6 text-base">התחילו עכשיו <ArrowLeft size={18} /></Link>
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div data-reveal-group className="grid grid-cols-2 gap-4">
             {[
               { icon: ShieldCheck, t: "הרשאות ותפקידים", d: "ועד, מנהל וחברה — כל אחד רואה את מה שרלוונטי לו." },
               { icon: Bell, t: "תקשורת יזומה", d: "עדכונים, נעיצות והתראות ישירות לדיירים." },
@@ -207,7 +211,7 @@ export default async function LandingPage() {
           <span className="badge-success">איך זה עובד</span>
           <h2 className="mt-3 text-3xl font-black tracking-tight">מתחברים בטלפון — והכל מוכן</h2>
         </div>
-        <div className="mt-9 grid gap-4 md:grid-cols-3">
+        <div data-reveal-group className="mt-9 grid gap-4 md:grid-cols-3">
           {steps.map((s) => (
             <div key={s.n} className="card p-6">
               <span className="grid h-11 w-11 place-items-center rounded-full brand-gradient text-lg font-black text-white">{s.n}</span>
@@ -219,7 +223,7 @@ export default async function LandingPage() {
       </section>
 
       <section className="landing-wrap pb-16">
-        <div className="landing-cta">
+        <div data-reveal className="landing-cta">
           <div className="landing-glow" aria-hidden />
           <div className="relative">
             <Phone size={30} className="mx-auto text-white/90" />
@@ -227,7 +231,7 @@ export default async function LandingPage() {
             <p className="mx-auto mt-3 max-w-xl text-white/85">הצטרפו לחברות ניהול ולדיירים שכבר עברו לניהול חכם, שקוף ופשוט.</p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               <Link href={appHref} className="btn h-12 bg-white px-6 text-base text-brand-ink">{primaryCta} <ArrowLeft size={18} /></Link>
-              <a href="#residents" className="btn btn-outline h-12 border-white/40 px-6 text-base text-white">עוד על הפיצ׳רים</a>
+              <WhatsAppButton label="דברו איתנו" />
             </div>
           </div>
         </div>
@@ -235,11 +239,14 @@ export default async function LandingPage() {
 
       <footer className="landing-foot">
         <div className="landing-wrap flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
-          <BrandLogo size={34} />
+          <BrandLogo size={34} uid="foot" />
           <p className="text-sm text-muted">© {new Date().getFullYear()} ועד · ניהול בניינים חכם</p>
           <Link href={appHref} className="text-sm font-bold text-brand">{session ? "לאפליקציה" : "כניסה"} ←</Link>
         </div>
       </footer>
+
+      <WhatsAppFab />
+      </LandingMotion>
     </main>
   );
 }

@@ -50,7 +50,7 @@ export default function LoginPage() {
       <div className="brand-gradient text-white px-6 pt-16 pb-12 rounded-b-[2rem]">
         <div className="mx-auto w-full max-w-md">
           <div className="flex items-center gap-3">
-            <BrandMark size={52} variant="glass" />
+            <BrandMark size={52} uid="login" />
             <div>
               <h1 className="text-2xl font-extrabold leading-tight">ועד</h1>
               <p className="text-white/80 text-sm">ניהול הבניין שלך, בכיס</p>

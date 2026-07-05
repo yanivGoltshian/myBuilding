@@ -9,8 +9,11 @@ const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const iconsDir = join(root, "public", "icons");
 
 const displaySvg = readFileSync(join(iconsDir, "icon.svg"), "utf8");
-// Full-bleed variant for maskable + apple-touch (OS applies its own mask).
-const fullBleedSvg = displaySvg.replaceAll('rx="112"', 'rx="0"');
+// Full-bleed variant for maskable + apple-touch (OS applies its own mask):
+// square the tile corners AND drop the decorative inner border.
+const fullBleedSvg = displaySvg
+  .replaceAll('rx="112"', 'rx="0"')
+  .replace(/<rect[^>]*data-edge[^>]*\/>/g, "");
 
 const png = (svg, size) =>
   sharp(Buffer.from(svg)).resize(size, size, { fit: "contain" }).png().toBuffer();

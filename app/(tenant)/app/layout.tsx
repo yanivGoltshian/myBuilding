@@ -16,7 +16,7 @@ export default async function TenantLayout({
   if (!session) redirect("/login");
 
   const building = await repo.getBuilding(session.buildingId);
-  const brand = building?.brandColor ?? "#4f46e5";
+  const brand = building?.brandColor ?? "#2563eb";
 
   const nav: NavItem[] = [
     { href: "/app", label: "בית", icon: <Home size={20} /> },

@@ -43,7 +43,7 @@ export default async function ManageLayout({ children }: { children: React.React
   );
 
   return (
-    <div style={{ ["--brand" as string]: building?.brandColor ?? "#4f46e5" }} className="min-h-full lg:ps-60">
+    <div style={{ ["--brand" as string]: building?.brandColor ?? "#2563eb" }} className="min-h-full lg:ps-60">
       <SideNav items={nav} rootHref="/manage" header={sideHeader} footer={logout} />
 
       <header className="sticky top-0 z-30 border-b border-border bg-surface/85 backdrop-blur-lg lg:hidden">
