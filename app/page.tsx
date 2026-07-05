@@ -22,6 +22,7 @@ import {
   Wrench,
 } from "lucide-react";
 import { getSession } from "@/lib/session";
+import { BrandLogo } from "./_components/brand";
 
 export const metadata = {
   title: "ניהול בניינים חכם לחברות ניהול ולדיירים",
@@ -62,9 +63,8 @@ export default async function LandingPage() {
     <main className="landing">
       <header className="landing-nav">
         <div className="landing-wrap flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 font-black">
-            <span className="grid h-9 w-9 place-items-center rounded-xl brand-gradient text-white"><Building2 size={18} /></span>
-            <span className="text-lg">ועד</span>
+          <Link href="/" className="flex items-center gap-2 font-black" aria-label="ועד — דף הבית">
+            <BrandLogo size={38} />
           </Link>
           <nav className="hidden items-center gap-6 text-sm font-bold text-muted md:flex">
             <a href="#residents" className="hover:text-text">לדיירים</a>
@@ -235,10 +235,7 @@ export default async function LandingPage() {
 
       <footer className="landing-foot">
         <div className="landing-wrap flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
-          <div className="flex items-center gap-2 font-black">
-            <span className="grid h-8 w-8 place-items-center rounded-lg brand-gradient text-white"><Building2 size={16} /></span>
-            ועד
-          </div>
+          <BrandLogo size={34} />
           <p className="text-sm text-muted">© {new Date().getFullYear()} ועד · ניהול בניינים חכם</p>
           <Link href={appHref} className="text-sm font-bold text-brand">{session ? "לאפליקציה" : "כניסה"} ←</Link>
         </div>

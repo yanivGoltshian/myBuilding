@@ -2,8 +2,9 @@
 
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
-import { Building2, ShieldCheck, Sparkles } from "lucide-react";
+import { ShieldCheck, Sparkles } from "lucide-react";
 import { loginPhoneAction, demoLoginAction } from "../actions";
+import { BrandMark } from "../_components/brand";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -49,9 +50,7 @@ export default function LoginPage() {
       <div className="brand-gradient text-white px-6 pt-16 pb-12 rounded-b-[2rem]">
         <div className="mx-auto w-full max-w-md">
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center size-12 rounded-2xl bg-white/15 backdrop-blur">
-              <Building2 className="size-7" />
-            </span>
+            <BrandMark size={52} variant="glass" />
             <div>
               <h1 className="text-2xl font-extrabold leading-tight">ועד</h1>
               <p className="text-white/80 text-sm">ניהול הבניין שלך, בכיס</p>
