@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CalendarDays, CheckCircle, Landmark, MessageCircle, PhoneCall, Vote, Wrench } from "lucide-react";
+import { CalendarDays, CheckCircle, Landmark, MessageCircle, PhoneCall, Sparkles, Vote, Wrench } from "lucide-react";
 import { payDuesAction, reactAction } from "@/app/actions";
 import { Badge, Card, IconTile, SectionHeader } from "@/components/ui/base";
 import { ProgressRing } from "@/components/ui/charts";
@@ -72,6 +72,7 @@ export default async function Page() {
           <Link href="/app/service" className="card card-hover tap p-4"><IconTile tone="warning"><Wrench size={18} /></IconTile><p className="mt-3 font-bold">קריאת שירות</p><p className="text-xs text-muted">דיווח מהיר לוועד</p></Link>
           <Link href="/app/community" className="card card-hover tap p-4"><IconTile tone="brand"><MessageCircle size={18} /></IconTile><p className="mt-3 font-bold">קהילה</p><p className="text-xs text-muted">עדכונים והצבעות</p></Link>
           {building?.roomBookingEnabled && <Link href="/app/more/room" className="card card-hover tap p-4"><IconTile tone="info"><CalendarDays size={18} /></IconTile><p className="mt-3 font-bold">הזמנת חדר</p><p className="text-xs text-muted">חדר הדיירים</p></Link>}
+          <Link href="/app/assistant" className="card card-hover tap p-4"><IconTile tone="brand"><Sparkles size={18} /></IconTile><p className="mt-3 font-bold">עוזר חכם</p><p className="text-xs text-muted">שאלו כל דבר על הבניין</p></Link>
           <Link href="/app/more/transparency" className="card card-hover tap p-4"><IconTile tone="success"><Landmark size={18} /></IconTile><p className="mt-3 font-bold">לאן הכסף</p><p className="text-xs text-muted">שקיפות מלאה</p></Link>
         </div>
       </section>

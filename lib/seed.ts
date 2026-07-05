@@ -29,6 +29,7 @@ export function seedDatabase(): Database {
         roomBookingFee: 120,
         bankName: "בנק הפועלים",
         bankLast4: "4821",
+        paymentMethods: ["credit", "standing_order", "bank_transfer", "check"],
       },
       {
         id: "b2",
@@ -42,6 +43,7 @@ export function seedDatabase(): Database {
         roomBookingFee: 150,
         bankName: "בנק לאומי",
         bankLast4: "1190",
+        paymentMethods: ["credit", "standing_order"],
       },
       {
         id: "b3",
@@ -268,6 +270,9 @@ export function seedDatabase(): Database {
         ],
       },
     ],
+    maintenance: buildMaintenance(),
+    checklists: buildChecklists(),
+    vendors: buildVendors(),
   };
 }
 
@@ -371,4 +376,70 @@ function buildLedger(): Database["ledger"] {
   add(4, "חניון", "תיקון מחסום חניון", 950, "expense", "capital", "מחסומי ישראל");
 
   return rows;
+}
+
+// YYYY-MM-DD offset by days from today — for maintenance next-due dates.
+function dueDate(daysFromNow: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysFromNow);
+  return d.toISOString().slice(0, 10);
+}
+
+// Preventive maintenance program for b1 — recurring building-care tasks.
+function buildMaintenance(): Database["maintenance"] {
+  return [
+    { id: "mt1", buildingId: "b1", title: "בדיקת מעליות תקופתית", category: "מעלית", cadence: "quarterly", nextDue: dueDate(9), lastDone: dueDate(-82), status: "scheduled", vendorId: "vn1", vendorName: "מעליות שינדלר", cost: 480, notes: "בדיקת בודק מוסמך + תיעוד" },
+    { id: "mt2", buildingId: "b1", title: "בדיקת מערכת כיבוי אש", category: "כיבוי אש", cadence: "yearly", nextDue: dueDate(-4), status: "overdue", vendorId: "vn5", vendorName: "בטיחות אש בע\"מ", cost: 1400, notes: "מטפים, גלגלונים ומערכת גילוי עשן" },
+    { id: "mt3", buildingId: "b1", title: "תחזוקת משאבות מים ולחץ", category: "משאבות", cadence: "biannual", nextDue: dueDate(21), lastDone: dueDate(-160), status: "scheduled", vendorId: "vn2", vendorName: "אינסטלציה 24/7", cost: 650 },
+    { id: "mt4", buildingId: "b1", title: "גיזום וטיפול בגינה", category: "גינון", cadence: "monthly", nextDue: dueDate(3), lastDone: dueDate(-27), status: "scheduled", vendorId: "vn4", vendorName: "גינון ירוק", cost: 300 },
+    { id: "mt5", buildingId: "b1", title: "ניקוי מיכל מים / בריכה", category: "תשתיות", cadence: "yearly", nextDue: dueDate(48), lastDone: dueDate(-320), status: "scheduled", vendorId: "vn2", vendorName: "אינסטלציה 24/7", cost: 2200 },
+    { id: "mt6", buildingId: "b1", title: "בדיקת גנרטור חירום", category: "חשמל", cadence: "quarterly", nextDue: dueDate(14), lastDone: dueDate(-78), status: "scheduled", vendorId: "vn3", vendorName: "חשמל ותאורה א.ב", cost: 520 },
+    { id: "mt7", buildingId: "b1", title: "בדיקת מערכת אינטרקום ושערים", category: "בקרת כניסה", cadence: "biannual", nextDue: dueDate(60), lastDone: dueDate(-120), status: "scheduled", vendorId: "vn6", vendorName: "מחסומי ישראל", cost: 780 },
+  ];
+}
+
+// Periodic inspection checklists for b1.
+function buildChecklists(): Database["checklists"] {
+  return [
+    {
+      id: "cl1", buildingId: "b1", title: "סיור בטיחות חודשי", category: "בטיחות", period: "חודשי", updatedAt: dueDate(-6),
+      items: [
+        { id: "ci1", text: "תאורת חירום בחדרי מדרגות תקינה", done: true },
+        { id: "ci2", text: "מטפי כיבוי במקומם ובתוקף", done: true },
+        { id: "ci3", text: "יציאות חירום פנויות ולא חסומות", done: false },
+        { id: "ci4", text: "דלתות אש נסגרות אוטומטית", done: false },
+        { id: "ci5", text: "שילוט חירום ברור ומואר", done: true },
+      ],
+    },
+    {
+      id: "cl2", buildingId: "b1", title: "ביקורת לובי ושטחים משותפים", category: "ניקיון", period: "שבועי", updatedAt: dueDate(-2),
+      items: [
+        { id: "ci6", text: "לובי נקי ומסודר", done: true },
+        { id: "ci7", text: "מעלית נקייה ותקינה", done: true },
+        { id: "ci8", text: "פחי אשפה רוקנו", done: true },
+        { id: "ci9", text: "תאורת חוץ פועלת", done: false },
+      ],
+    },
+    {
+      id: "cl3", buildingId: "b1", title: "מוכנות חורף", category: "תשתיות", period: "עונתי", updatedAt: dueDate(-20),
+      items: [
+        { id: "ci10", text: "ניקוי מרזבים ותעלות ניקוז", done: false },
+        { id: "ci11", text: "בדיקת איטום גג", done: false },
+        { id: "ci12", text: "בדיקת ניקוז חניון תת-קרקעי", done: false },
+      ],
+    },
+  ];
+}
+
+// Trusted vendor / supplier directory for b1.
+function buildVendors(): Database["vendors"] {
+  return [
+    { id: "vn1", buildingId: "b1", name: "מעליות שינדלר", category: "מעליות", phone: "1-800-000-000", contactName: "מוקד שירות", rating: 5, preferred: true, notes: "חוזה אחזקה חודשי + מוקד תקלות 24/7" },
+    { id: "vn2", buildingId: "b1", name: "אינסטלציה 24/7", category: "אינסטלציה", phone: "0537778890", contactName: "דוד", rating: 5, preferred: true, notes: "חירום מים וביוב בכל שעה" },
+    { id: "vn3", buildingId: "b1", name: "חשמל ותאורה א.ב", category: "חשמל", phone: "0536664455", contactName: "אבי", rating: 4, preferred: true },
+    { id: "vn4", buildingId: "b1", name: "גינון ירוק", category: "גינון", phone: "0535551122", contactName: "יוסי", rating: 4 },
+    { id: "vn5", buildingId: "b1", name: "בטיחות אש בע\"מ", category: "כיבוי אש", phone: "0733210000", contactName: "מחלקת שירות", rating: 4, notes: "בדיקות שנתיות ומילוי מטפים" },
+    { id: "vn6", buildingId: "b1", name: "מחסומי ישראל", category: "שערים וחניה", phone: "0733345566", rating: 3 },
+    { id: "vn7", buildingId: "b1", name: "ניקיון הבזק", category: "ניקיון", phone: "0535556677", contactName: "מירי", rating: 5, preferred: true },
+  ];
 }

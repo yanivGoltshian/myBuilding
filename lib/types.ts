@@ -13,6 +13,13 @@ export interface ManagementCompany {
   phone: string;
 }
 
+// Digital collection channels the committee can enable per building.
+export type PaymentMethod =
+  | "credit"        // כרטיס אשראי
+  | "standing_order" // הוראת קבע
+  | "check"         // צ'ק דיגיטלי
+  | "bank_transfer"; // העברה בנקאית
+
 export interface Building {
   id: string;
   companyId: string;
@@ -25,6 +32,7 @@ export interface Building {
   roomBookingFee?: number; // committee-set fee (₪) charged per room booking
   bankName?: string;
   bankLast4?: string;
+  paymentMethods?: PaymentMethod[]; // enabled online collection channels
 }
 
 export interface Unit {
@@ -268,6 +276,60 @@ export interface BuildingInfo {
   facilities: Facility[];
 }
 
+// ---- Preventive maintenance, checklists & vendors (proactive building care) ----
+export type MaintenanceCadence =
+  | "weekly"
+  | "monthly"
+  | "quarterly"
+  | "biannual"
+  | "yearly";
+
+export type MaintenanceStatus = "scheduled" | "overdue" | "done";
+
+export interface MaintenanceTask {
+  id: string;
+  buildingId: string;
+  title: string;
+  category: string; // "מעלית", "כיבוי אש", "משאבות", "גינון"...
+  cadence: MaintenanceCadence;
+  nextDue: string; // YYYY-MM-DD
+  lastDone?: string; // YYYY-MM-DD
+  status: MaintenanceStatus;
+  vendorId?: string;
+  vendorName?: string;
+  cost?: number; // typical cost per service (₪)
+  notes?: string;
+}
+
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+export interface Checklist {
+  id: string;
+  buildingId: string;
+  title: string;
+  category?: string; // "בטיחות", "ניקיון", "תשתיות"
+  period?: string; // "חודשי", "רבעוני"...
+  items: ChecklistItem[];
+  updatedAt: string;
+}
+
+export interface Vendor {
+  id: string;
+  buildingId: string;
+  name: string;
+  category: string; // trade — "אינסטלציה", "חשמל", "מעליות"...
+  phone: string;
+  contactName?: string;
+  email?: string;
+  rating?: number; // 1-5 committee rating
+  preferred?: boolean; // ספק מועדף
+  notes?: string;
+}
+
 export interface SessionUser {
   residentId?: string;
   name: string;
@@ -295,4 +357,7 @@ export interface Database {
   gates: Gate[];
   meetings: Meeting[];
   buildingInfo: BuildingInfo[];
+  maintenance: MaintenanceTask[];
+  checklists: Checklist[];
+  vendors: Vendor[];
 }

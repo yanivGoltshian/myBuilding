@@ -9,7 +9,7 @@ import {
   setSession,
   clearSession,
 } from "@/lib/session";
-import type { MarketCategory, MeetingDecision } from "@/lib/types";
+import type { MarketCategory, MeetingDecision, PaymentMethod } from "@/lib/types";
 
 function currentPeriod(): string {
   const d = new Date();
@@ -46,7 +46,11 @@ export async function payDuesAction(formData: FormData) {
   const session = await getSession();
   if (!session?.unitId) return;
   const period = String(formData.get("period") ?? currentPeriod());
-  await repo.payDues(session.unitId, period);
+  const methodRaw = String(formData.get("method") ?? "credit");
+  const method = (["credit", "standing_order", "check", "bank_transfer"].includes(methodRaw)
+    ? methodRaw
+    : "credit") as PaymentMethod;
+  await repo.payDues(session.unitId, period, method);
   revalidatePath("/app/payments");
   revalidatePath("/app");
 }
@@ -327,15 +331,20 @@ export async function updateBrandingAction(formData: FormData) {
     feeRaw === null || String(feeRaw).trim() === ""
       ? undefined
       : Math.max(0, Number(feeRaw));
+  const allMethods: PaymentMethod[] = ["credit", "standing_order", "check", "bank_transfer"];
+  const paymentMethods = allMethods.filter((m) => formData.get(`pm_${m}`) === "on");
   await repo.updateBranding(session.buildingId, {
     brandColor: brandColor || undefined,
     logoText: logoText || undefined,
     roomBookingEnabled,
     roomBookingFee,
+    paymentMethods,
   });
   revalidatePath("/manage/settings");
   revalidatePath("/manage");
   revalidatePath("/app/more/room");
+  revalidatePath("/app/payments");
+  revalidatePath("/app");
 }
 
 /* ---------------- Configurable building info hub ---------------- */
@@ -462,4 +471,129 @@ export async function removeFacilityAction(formData: FormData) {
     facilities: info.facilities.filter((f) => f.id !== id),
   });
   revalidateInfo();
+}
+
+/* ---------------- Preventive maintenance, checklists & vendors ---------------- */
+
+function revalidateMaintenance() {
+  revalidatePath("/manage/maintenance");
+  revalidatePath("/manage");
+  revalidatePath("/app/more");
+  revalidatePath("/app");
+}
+
+export async function addVendorAction(formData: FormData) {
+  const session = await getSession();
+  if (!session) return;
+  const name = String(formData.get("name") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
+  const contactName = String(formData.get("contactName") ?? "").trim();
+  const notes = String(formData.get("notes") ?? "").trim();
+  const preferred = formData.get("preferred") === "on";
+  if (!name || !category || !phone) return;
+  await repo.addVendor({
+    buildingId: session.buildingId,
+    name,
+    category,
+    phone,
+    contactName: contactName || undefined,
+    notes: notes || undefined,
+    preferred,
+  });
+  revalidatePath("/manage/vendors");
+  revalidatePath("/manage/maintenance");
+}
+
+export async function deleteVendorAction(formData: FormData) {
+  const session = await getSession();
+  if (!session) return;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await repo.deleteVendor(id);
+  revalidatePath("/manage/vendors");
+  revalidatePath("/manage/maintenance");
+}
+
+export async function addMaintenanceAction(formData: FormData) {
+  const session = await getSession();
+  if (!session) return;
+  const title = String(formData.get("title") ?? "").trim();
+  const category = String(formData.get("category") ?? "").trim();
+  const cadenceRaw = String(formData.get("cadence") ?? "monthly");
+  const cadence = (["weekly", "monthly", "quarterly", "biannual", "yearly"].includes(cadenceRaw)
+    ? cadenceRaw
+    : "monthly") as "weekly" | "monthly" | "quarterly" | "biannual" | "yearly";
+  const nextDue = String(formData.get("nextDue") ?? "").trim();
+  const vendorId = String(formData.get("vendorId") ?? "").trim();
+  const costRaw = formData.get("cost");
+  const cost =
+    costRaw === null || String(costRaw).trim() === ""
+      ? undefined
+      : Math.max(0, Number(costRaw));
+  if (!title || !category || !nextDue) return;
+  let vendorName: string | undefined;
+  if (vendorId) {
+    const vendors = await repo.getVendorsByBuilding(session.buildingId);
+    vendorName = vendors.find((v) => v.id === vendorId)?.name;
+  }
+  await repo.addMaintenanceTask({
+    buildingId: session.buildingId,
+    title,
+    category,
+    cadence,
+    nextDue,
+    vendorId: vendorId || undefined,
+    vendorName,
+    cost,
+  });
+  revalidateMaintenance();
+}
+
+export async function completeMaintenanceAction(formData: FormData) {
+  const session = await getSession();
+  if (!session) return;
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  await repo.completeMaintenanceTask(id);
+  revalidateMaintenance();
+}
+
+export async function toggleChecklistItemAction(formData: FormData) {
+  const session = await getSession();
+  if (!session) return;
+  const checklistId = String(formData.get("checklistId") ?? "");
+  const itemId = String(formData.get("itemId") ?? "");
+  if (!checklistId || !itemId) return;
+  await repo.toggleChecklistItem(checklistId, itemId);
+  revalidatePath("/manage/maintenance");
+}
+
+/* ---------------- AI resident assistant ---------------- */
+
+export type AssistantCallResult = { ok: boolean; id?: string };
+
+// The assistant can open a service call on the resident's behalf (no redirect —
+// the chat renders an inline confirmation).
+export async function assistantOpenCallAction(
+  _prev: AssistantCallResult | undefined,
+  formData: FormData
+): Promise<AssistantCallResult> {
+  const session = await getSession();
+  if (!session) return { ok: false };
+  const subject = String(formData.get("subject") ?? "").trim();
+  const category = String(formData.get("category") ?? "כללי");
+  const description = String(formData.get("description") ?? "").trim();
+  if (!subject) return { ok: false };
+  const call = await repo.createCall({
+    buildingId: session.buildingId,
+    unitId: session.unitId ?? "",
+    residentName: session.name,
+    subject,
+    category,
+    description: description || subject,
+  });
+  revalidatePath("/app/service");
+  revalidatePath("/app");
+  return { ok: true, id: call.id };
 }

@@ -1,4 +1,4 @@
-import { CalendarDays, DoorOpen, FileText, Landmark, LogOut, MessageCircle, PhoneCall, UserRound } from "lucide-react";
+import { CalendarDays, DoorOpen, FileText, Landmark, LogOut, MessageCircle, PhoneCall, Sparkles, UserRound } from "lucide-react";
 import { logoutAction } from "@/app/actions";
 import { Avatar, Card, IconTile, SectionHeader } from "@/components/ui/base";
 import { repo } from "@/lib/repo";
@@ -23,6 +23,7 @@ export default async function Page() {
       <section className="fade-up">
         <SectionHeader title="כלים ושירותים" />
         <div className="grid grid-cols-2 gap-3">
+          <ActionTile href="/app/assistant" icon={<Sparkles size={18} />} label="עוזר חכם" sub="שאלו כל דבר על הבניין" />
           <ActionTile href="/app/more/info" icon={<PhoneCall size={18} />} label="מידע ואנשי קשר" sub="טלפונים וקודים" />
           {info?.whatsappUrl && <ActionTile href={info.whatsappUrl} icon={<MessageCircle size={18} />} label="קבוצת WhatsApp" sub="פתיחה חיצונית" external />}
           {building?.roomBookingEnabled && <ActionTile href="/app/more/room" icon={<CalendarDays size={18} />} label="הזמנת חדר" sub="יומן דיירים" />}

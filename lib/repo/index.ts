@@ -1,5 +1,6 @@
 import type { Database } from "../types";
 import { seedDatabase } from "../seed";
+import { paymentMethodLabel } from "../payments";
 import type {
   BrandingInput,
   BuildingInfoInput,
@@ -8,9 +9,11 @@ import type {
   NewBookingInput,
   NewCallInput,
   NewLedgerInput,
+  NewMaintenanceInput,
   NewMarketInput,
   NewMeetingInput,
   NewPollInput,
+  NewVendorInput,
   Repo,
   UpdateMarketInput,
 } from "./types";
@@ -122,6 +125,24 @@ export const mockRepo: Repo = {
   async getBuildingInfo(buildingId) {
     return db().buildingInfo.find((i) => i.buildingId === buildingId);
   },
+  async getMaintenanceByBuilding(buildingId) {
+    return db()
+      .maintenance.filter((m) => m.buildingId === buildingId)
+      .sort((a, b) => a.nextDue.localeCompare(b.nextDue));
+  },
+  async getChecklistsByBuilding(buildingId) {
+    return db()
+      .checklists.filter((c) => c.buildingId === buildingId)
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+  },
+  async getVendorsByBuilding(buildingId) {
+    return db()
+      .vendors.filter((v) => v.buildingId === buildingId)
+      .sort((a, b) => {
+        if (a.preferred !== b.preferred) return a.preferred ? -1 : 1;
+        return a.category.localeCompare(b.category, "he");
+      });
+  },
 
   async createCall(input: NewCallInput) {
     const now = new Date().toISOString();
@@ -142,14 +163,15 @@ export const mockRepo: Repo = {
       call.updatedAt = new Date().toISOString();
     }
   },
-  async payDues(unitId, period) {
+  async payDues(unitId, period, method) {
     const d = db();
     let pay = d.payments.find((p) => p.unitId === unitId && p.period === period);
     const now = new Date().toISOString();
+    const label = paymentMethodLabel(method);
     if (pay) {
       pay.status = "paid";
       pay.paidAt = now;
-      pay.method = "כרטיס אשראי";
+      pay.method = label;
     } else {
       const unit = d.units.find((u) => u.id === unitId);
       pay = {
@@ -160,7 +182,7 @@ export const mockRepo: Repo = {
         amount: unit?.monthlyDues ?? 0,
         status: "paid",
         paidAt: now,
-        method: "כרטיס אשראי",
+        method: label,
       };
       d.payments.push(pay);
     }
@@ -276,6 +298,8 @@ export const mockRepo: Repo = {
       b.roomBookingEnabled = input.roomBookingEnabled;
     if (input.roomBookingFee !== undefined)
       b.roomBookingFee = input.roomBookingFee;
+    if (input.paymentMethods !== undefined)
+      b.paymentMethods = input.paymentMethods;
   },
   async updateBuildingInfo(buildingId, input: BuildingInfoInput) {
     const d = db();
@@ -289,6 +313,52 @@ export const mockRepo: Repo = {
     if (input.codes !== undefined) info.codes = input.codes;
     if (input.facilities !== undefined) info.facilities = input.facilities;
     return info;
+  },
+  async addVendor(input: NewVendorInput) {
+    const vendor = { id: rid("vn"), rating: 0, ...input };
+    db().vendors.unshift(vendor);
+    return vendor;
+  },
+  async deleteVendor(id) {
+    const d = db();
+    d.vendors = d.vendors.filter((v) => v.id !== id);
+  },
+  async addMaintenanceTask(input: NewMaintenanceInput) {
+    const overdue = input.nextDue < new Date().toISOString().slice(0, 10);
+    const task = {
+      id: rid("mt"),
+      ...input,
+      status: (overdue ? "overdue" : "scheduled") as "overdue" | "scheduled",
+    };
+    db().maintenance.push(task);
+    return task;
+  },
+  async completeMaintenanceTask(id) {
+    const task = db().maintenance.find((m) => m.id === id);
+    if (!task) return undefined;
+    const today = new Date();
+    task.lastDone = today.toISOString().slice(0, 10);
+    const next = new Date(today);
+    const steps: Record<string, number> = {
+      weekly: 7,
+      monthly: 30,
+      quarterly: 91,
+      biannual: 182,
+      yearly: 365,
+    };
+    next.setDate(next.getDate() + (steps[task.cadence] ?? 30));
+    task.nextDue = next.toISOString().slice(0, 10);
+    task.status = "scheduled";
+    return task;
+  },
+  async toggleChecklistItem(checklistId, itemId) {
+    const list = db().checklists.find((c) => c.id === checklistId);
+    const item = list?.items.find((i) => i.id === itemId);
+    if (list && item) {
+      item.done = !item.done;
+      list.updatedAt = new Date().toISOString().slice(0, 10);
+    }
+    return list;
   },
 };
 

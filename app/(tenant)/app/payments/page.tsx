@@ -1,4 +1,4 @@
-import { CreditCard, ReceiptText, WalletCards } from "lucide-react";
+import { ReceiptText, WalletCards } from "lucide-react";
 import { payDuesAction } from "@/app/actions";
 import { Card, EmptyState, SectionHeader, StatCard } from "@/components/ui/base";
 import { ProgressRing } from "@/components/ui/charts";
@@ -6,11 +6,12 @@ import { fmtDate, fmtILS, periodLabel } from "@/lib/format";
 import { unitBalance } from "@/lib/finance";
 import { repo } from "@/lib/repo";
 import { currentPeriod, getTenantContext, PaymentStatusBadge, yearlyProgress } from "../../_components/tenant-ui";
+import { PayForm } from "./PayForm";
 
 export const metadata = { title: "תשלומים" };
 
 export default async function Page() {
-  const { session } = await getTenantContext();
+  const { session, building } = await getTenantContext();
   if (!session.unitId) {
     return <EmptyState icon={<WalletCards size={24} />} title="אין דירה משויכת" sub="לא נמצאו תשלומים עבור המשתמש הזה." />;
   }
@@ -19,6 +20,7 @@ export default async function Page() {
   const open = payments.filter((p) => p.status !== "paid");
   const paid = payments.filter((p) => p.status === "paid");
   const progress = yearlyProgress(payments);
+  const methods = building?.paymentMethods ?? ["credit"];
 
   return (
     <div className="space-y-4">
@@ -31,10 +33,7 @@ export default async function Page() {
           </div>
           <ProgressRing value={progress} size={82} thickness={8}>{Math.round(progress * 100)}%</ProgressRing>
         </div>
-        <form action={payDuesAction} className="mt-5">
-          <input type="hidden" name="period" value={open[0]?.period ?? currentPeriod()} />
-          <button className="btn btn-brand w-full" type="submit"><CreditCard size={17} /> שלם דמי ועד</button>
-        </form>
+        <PayForm period={open[0]?.period ?? currentPeriod()} methods={methods} />
       </Card>
 
       <div className="grid grid-cols-2 gap-3 fade-up">
